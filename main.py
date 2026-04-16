@@ -41,7 +41,7 @@ except Exception as e:
     logger.error(f"❌ Firebase Error: {e}")
 
 # ================= CONFIGURATION =================
-BOT_TOKEN = "8525057709:AAHk8EzWfB268Pnz48gg8scF4OXLr7LPm6M"
+BOT_TOKEN = "8525057709:AAEXv7b8l8tA9qb1KuCDtlv74d9LtaVWe1Q"
 ADMIN_ID = 1146186608
 REQUIRED_CHANNEL = -1001481593780
 CHANNEL_LINK = "https://t.me/+3U0nMzWs4Aw0YjFl"
