@@ -1,79 +1,34 @@
 import logging
-import os
 import asyncio
-import sys
-import json
-from threading import Thread
-from flask import Flask
-import firebase_admin
-from firebase_admin import credentials, db
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, WebAppInfo
+import os
+import threading
+from http.server import BaseHTTPRequestHandler, HTTPServer
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, ChatMember, WebAppInfo
 from telegram.ext import (
-    ApplicationBuilder,
-    ContextTypes,
-    CommandHandler,
-    CallbackQueryHandler,
-    MessageHandler,
-    filters,
+    ApplicationBuilder, 
+    ContextTypes, 
+    CommandHandler, 
+    CallbackQueryHandler, 
+    MessageHandler, 
+    filters, 
     ConversationHandler
 )
+from telegram.error import BadRequest, Forbidden
 
-# ================= লগিং সেটআপ =================
-logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s', level=logging.INFO)
-logger = logging.getLogger(__name__)
+# ================= RENDER DUMMY SERVER (পোর্টের ঝামেলা এড়াতে) =================
+class DummyHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.send_header("Content-type", "text/plain")
+        self.end_headers()
+        self.wfile.write(b"Bot is perfectly running on Render!")
 
-# ================= ফায়ারবেস কানেকশন =================
-try:
-    if not firebase_admin._apps:
-        firebase_json = os.environ.get("FIREBASE_JSON")
-        
-        if firebase_json:
-            cred_dict = json.loads(firebase_json)
-            cred = credentials.Certificate(cred_dict)
-            logger.info("✅ Firebase initialized from Environment Variable!")
-        elif os.path.exists("firebase-key.json"):
-            cred = credentials.Certificate("firebase-key.json")
-            logger.info("✅ Firebase initialized from firebase-key.json file!")
-        else:
-            logger.error("❌ No Firebase credentials found!")
-            sys.exit(1)
+def run_dummy_server():
+    port = int(os.environ.get("PORT", 10000))
+    server = HTTPServer(("0.0.0.0", port), DummyHandler)
+    server.serve_forever()
 
-        firebase_admin.initialize_app(cred, {
-            'databaseURL': 'https://telegram-60f96-default-rtdb.firebaseio.com/'
-        })
-    
-    db.reference('connection_test').set({'status': 'online'})
-    
-except Exception as e:
-    logger.error(f"❌ Firebase Critical Error: {e}")
-    sys.exit(1) 
-
-# ================= ডাটাবেস ফাংশন =================
-def save_user_to_firebase(user):
-    try:
-        ref = db.reference(f'users/{user.id}')
-        if ref.get() is None:
-            ref.set({'id': user.id, 'first_name': user.first_name, 'username': user.username, 'status': 'active'})
-    except Exception as e:
-        logger.error(f"❌ Error saving user: {e}")
-
-def get_all_users():
-    try:
-        ref = db.reference('users')
-        users = ref.get()
-        return list(users.keys()) if users else []
-    except: return []
-
-# ================= ওয়েব সার্ভার =================
-app = Flask(__name__)
-@app.route('/')
-def home(): return "Bot is Online"
-
-def run_flask():
-    port = int(os.environ.get("PORT", 8080))
-    app.run(host='0.0.0.0', port=port)
-
-# ================= বটের কনফিগারেশন =================
+# ================= CONFIGURATION =================
 BOT_TOKEN = os.getenv("BOT_TOKEN", "8525057709:AAE6kuNKFx1xtsp7HvhJygTXZZval9iE278")
 ADMIN_ID = int(os.getenv("ADMIN_ID", "1146186608"))
 REQUIRED_CHANNEL = int(os.getenv("REQUIRED_CHANNEL", "-1001481593780"))
