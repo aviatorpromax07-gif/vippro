@@ -15,25 +15,35 @@ from telegram.ext import (
 )
 from telegram.error import BadRequest, Forbidden
 
-# ================= FIREBASE SETUP (Via Secret File) =================
+# ================= FIREBASE SETUP (Direct Dictionary) =================
 import firebase_admin
 from firebase_admin import credentials, firestore
 
-db = None
-FIREBASE_KEY_PATH = "firebase.json"
+# আপনার দেওয়া Firebase JSON ডেটা সরাসরি এখানে বসিয়ে দেওয়া হয়েছে
+FIREBASE_CREDS_DICT = {
+  "type": "service_account",
+  "project_id": "winbot-eea9a",
+  "private_key_id": "0fc394504ed2eb8954ec426bbe11f46eec38ffb0",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDGPOJtItY6HTIS\nqr+K+wiVmjaa1hl+qpRlHH6AjdUHVEIoVteooVHleZW/XlJZRyNMnp0fnqcChb/9\n5uXbLreay1UEnmwFUmxoqGADbxh9FSrCoyczrIGXr3EfoENxH9wVU8dtwlK6g1fY\nl0e8btmweoTsDt8qCA1BfaOBKccWCFkkg2wu8zVqghTOCw09/upzgTPALvuwDcDC\nWNpYzj87y2j+f2CMdu4RRiDZ+VosIIhSAAV1Y193UELcZDTv5/Wlj6mbKWb+O0xK\n8Yp5Z3LS/Yg4T+IsDHCxmk+3Ul3qPNb8Avuy0HuWBEgwj4rqxBoMMTjUIopp1h69\nxzbFkKu7AgMBAAECggEAAXVeNxkBWXvF1rRR5McJs6Fm/cb4eLbu5jrfmrjbFIrj\n/QxShDJCT31lrXrsq9fQTyvVkm97jBMJgWfgULdXG3jxKa+0B2qpUzB18GCHXhg4\nmyZRz1lZZLvM3xjclimlWAoolp/44C1qM9+SZApZaKkmGYnXI3sxWcYqXJ9pkGRr\nrSPZw77hY3H+2ByNO6mBGYR+yecjvTOUcBZuIqgkEmv+dRhec/QllmXZCDTYyWWM\nj6iAA1ARAQ9tep5tsv4tDUI801v24SJ0ulQLDFvaEZ16fSBu0fTnjDYeK8ukSQYB\nNfUbfGQRLeeii8XCktPtP47Vda5x9kM3ANRJdJ7FmQKBgQDwLRqqKXgjumOmY78F\ndvP/p5iYaH1nsEJ6m/JxgzyHIwhu1xS7v7KRyjLZyxTD614FK15qh3nX0A/Q2+M5\nQywNhMXnPPB01tMsFJTFKVb7TBa9XcVtQcV7XPHugceKAFUp3nQC1sw1lKKluFWb\nvuXKdkigHJ4EiNWERgoBfjyv6QKBgQDTTG7qDldWLs8UXVglwBpaMXGw/PEJxkiW\n8MHKCbhEfwU7PCB2yoB3mN+5tjPJ49g28J7FaklIwjBRxGFP3rVVtnJ2vyQzfr6n\nL1D6jAZUPLjmUWx8rCB2jWFL7eBxVlPc63tE33CMGpxq8oiBkyKsPf61pRLqNEP6\nzzCJIKA8AwKBgQCPi1WRd+F+8QpXyuvDF1ozZPZ1uJWi4ByLbSMUpswJNG342QFi\nSOsv6TpFIvQROF3kFwyB/OBclNSvDoyaj8QHfGBPmQNZwX9KrC5SPCfpX4uDuESj\nzRh7Z4yM8PHST+qWcIbDn59DMseW5jn8MLbkL5euYgwrR6DdQoL+a3VX6QKBgQCC\nKe+Zl8QNf0Bp1ybZ+oFBVnwm/2qtDszgzudSQrKU33qlhuCozQ5ennoTuT4l/InR\nLmFgU51ZiOajOEqKHTOv3Xid1hnC7y0baHaGIYQ0mEN+/mHKW26UGXv6fktpBjkb\nOqTxRIPcivgYmdelmrIdUQN7enkwdYn7E29eyg5raQKBgG/kppUI/hJy0sA2TkWW\nIS/poxxHLw3VO2mNDJKhW+n1okzJ2x3Ftx3han2AlAUXmLXiOH+R0GKRpT7Xtz8J\nDP4rNxnZJ8smPuWIC4YbI9kEDrF4Pgd2USmawrycMqZdcTJ6jtSMHUdVJoTbgyd1\nicEVdXxDzM5IGdi42DcSyGBB\n-----END PRIVATE KEY-----\n",
+  "client_email": "firebase-adminsdk-fbsvc@winbot-eea9a.iam.gserviceaccount.com",
+  "client_id": "111122027484565922605",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-fbsvc%40winbot-eea9a.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
 
+db = None
 try:
-    if os.path.exists(FIREBASE_KEY_PATH):
-        cred = credentials.Certificate(FIREBASE_KEY_PATH)
-        firebase_admin.initialize_app(cred)
-        db = firestore.client()
-        print("🔥 Firebase Connected Successfully!")
-    else:
-        print("⚠️ firebase.json not found! Saving users to users.txt locally.")
+    cred = credentials.Certificate(FIREBASE_CREDS_DICT)
+    firebase_admin.initialize_app(cred)
+    db = firestore.client()
+    print("🔥 Firebase Connected Successfully!")
 except Exception as e:
     print(f"❌ Firebase Init Error: {e}")
 
-# ================= RENDER DUMMY SERVER =================
+# ================= RENDER DUMMY SERVER (পোর্টের ঝামেলা এড়াতে) =================
 class DummyHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         self.send_response(200)
@@ -52,7 +62,7 @@ ADMIN_ID = int(os.getenv("ADMIN_ID", "1146186608"))
 REQUIRED_CHANNEL = int(os.getenv("REQUIRED_CHANNEL", "-1001481593780"))
 CHANNEL_LINK = "https://t.me/+3U0nMzWs4Aw0YjFl"
 
-# --- MEDIA & HACK LINKS ---
+# --- MEDIA LINKS (FIXED URLS) ---
 IMAGE_URL_WELCOME = "https://i.ibb.co/XfxnhBYY/file-000000006ac47206b9a3e5b41d2e17e1.png"
 IMAGE_URL_REG = "https://i.ibb.co/PZ5VTZVT/IMG-20260201-052425-386.jpg"
 IMAGE_URL_SUCCESS = "https://i.ibb.co/fdwt2s8D/file-00000000973471faba7ce65cd5c96718.png"
@@ -63,10 +73,12 @@ LOGO_MINES = "https://i.ibb.co/MDVxth7x/images-8.jpg"
 LOGO_PENALTY = "https://i.ibb.co/5WzBdWX4/hqdefault.jpg"
 LOGO_KING_THIMBLES = "https://i.ibb.co/8LYwvg1j/maxresdefault.jpg"
 
+# --- HACK LINKS ---
 LINK_AVIATOR = "https://aviatorbahohacker.fwh.is/"
 LINK_MINES = "https://mines-game-hack.netlify.app/"
 LINK_PENALTY = "https://pnalteaybot.netlify.app/"
 LINK_KING_THIMBLES = "https://kingthimblesbot.netlify.app/"
+
 HOW_TO_USE_LINK = "https://youtube.com/@sunny_bro11?si=gYfOtXnKayCkZloF"
 
 # --- FILES ---
@@ -88,7 +100,7 @@ LANGUAGES = {
     'br': {'name': '🇧🇷 Brazil', 'earn_btn': 'Começar a Ganhar Dinheiro', 'reg_btn': 'Registro', 'verify_btn': '✅ Eu me Registrei', 'ask_id': 'Envie seu ID de 9 dígitos:', 'analyzing': '🔄 Analisando...', 'success_msg': '✅ <b>Conta Verificada!</b>', 'play_btn': 'Play With Hack', 'guide_btn': 'Como usar', 'help_btn': 'Ajuda', 'select_game': 'Selecionar Jogo:'}
 }
 
-# ================= DATABASE FUNCTIONS =================
+# ================= DATABASE FUNCTIONS (FIREBASE + LOCAL) =================
 def get_users_local():
     if not os.path.exists(USER_FILE):
         return[]
@@ -103,19 +115,19 @@ def get_users():
             for doc in docs:
                 users_set.add(doc.id)
         except Exception as e:
-            logging.error(f"Firebase fetch error: {e}")
+            logging.error(f"Firebase get error: {e}")
     return list(users_set)
 
 def save_user(user_id):
     user_id_str = str(user_id)
     
-    # 1. Local Backup
+    # 1. Save locally as backup
     users_local = get_users_local()
     if user_id_str not in users_local:
         with open(USER_FILE, "a") as f:
             f.write(f"{user_id_str}\n")
             
-    # 2. Firebase Save
+    # 2. Save to Firebase
     if db:
         try:
             doc_ref = db.collection('bot_users').document(user_id_str)
@@ -131,7 +143,7 @@ async def check_membership(user_id: int, context: ContextTypes.DEFAULT_TYPE):
         return member.status in[ChatMember.MEMBER, ChatMember.OWNER, ChatMember.ADMINISTRATOR]
     except BadRequest:
         return False
-    except Exception:
+    except Exception as e:
         return False
 
 async def send_language_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -143,7 +155,8 @@ async def send_language_menu(update: Update, context: ContextTypes.DEFAULT_TYPE)
         [InlineKeyboardButton(LANGUAGES['pk']['name'], callback_data='lang_pk'),
          InlineKeyboardButton(LANGUAGES['bd']['name'], callback_data='lang_bd')],
         [InlineKeyboardButton(LANGUAGES['id']['name'], callback_data='lang_id'),
-         InlineKeyboardButton(LANGUAGES['ru']['name'], callback_data='lang_ru')],[InlineKeyboardButton(LANGUAGES['tr']['name'], callback_data='lang_tr'),
+         InlineKeyboardButton(LANGUAGES['ru']['name'], callback_data='lang_ru')],
+        [InlineKeyboardButton(LANGUAGES['tr']['name'], callback_data='lang_tr'),
          InlineKeyboardButton(LANGUAGES['br']['name'], callback_data='lang_br')],
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
@@ -157,14 +170,18 @@ async def send_language_menu(update: Update, context: ContextTypes.DEFAULT_TYPE)
 # ================= HANDLERS =================
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
-    save_user(user_id) 
+    save_user(user_id) # ইউজার অটোমেটিক ফায়ারবেসে সেভ হবে
     
     is_member = await check_membership(user_id, context)
     
     if is_member:
         await send_language_menu(update, context)
     else:
-        join_text = "⚠️ <b>Action Required!</b>\n\nTo use this bot, you must join our official Private channel first.\nPlease join the channel and click 'Joined' button below."
+        join_text = (
+            "⚠️ <b>Action Required!</b>\n\n"
+            "To use this bot, you must join our official Private channel first.\n"
+            "Please join the channel and click 'Joined' button below."
+        )
         keyboard = [[InlineKeyboardButton("📢 Join Private Channel", url=CHANNEL_LINK)],[InlineKeyboardButton("✅ Joined / Verify", callback_data='check_join_status')]]
         await context.bot.send_message(chat_id=user_id, text=join_text, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode='HTML')
     return ConversationHandler.END
@@ -178,6 +195,7 @@ async def restart_bot_handler(update: Update, context: ContextTypes.DEFAULT_TYPE
 async def check_join_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     user_id = update.effective_user.id
+    
     if await check_membership(user_id, context):
         await query.answer("✅ Verification Successful!")
         await send_language_menu(update, context)
@@ -187,6 +205,7 @@ async def check_join_callback(update: Update, context: ContextTypes.DEFAULT_TYPE
 async def language_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
+
     lang_code = query.data.split('_')[1]
     context.user_data['selected_lang'] = lang_code
     lang_data = LANGUAGES.get(lang_code, LANGUAGES['en'])
@@ -197,84 +216,131 @@ async def language_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await query.message.delete()
     try:
         await context.bot.send_photo(chat_id=update.effective_chat.id, photo=IMAGE_URL_WELCOME, caption=f"Language: {lang_data['name']}\n\nClick below to proceed:", reply_markup=reply_markup)
-    except Exception:
+    except Exception as e:
         await context.bot.send_message(chat_id=update.effective_chat.id, text="Click below to start:", reply_markup=reply_markup)
     return ConversationHandler.END
 
 async def show_registration_info(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
+
     lang_code = context.user_data.get('selected_lang', 'en')
     lang_data = LANGUAGES.get(lang_code, LANGUAGES['en'])
 
-    info_text = "<b>Step 1- Register.</b>\n\nTo synchronize with the bot, you need to create a new account strictly via the link from the bot and use the promo code <b>BLACK110</b>\n\nIf you opened the link and accessed an old account, you need to:\n- Log out of the old account\n- Close the website\n- Reopen the link from the bot's button\n\n<b>2- Complete the registration</b>\n\nAfter successful registration, click the <b>Verify</b> button below."
+    info_text = (
+        "<b>Step 1- Register.</b>\n\n"
+        "To synchronize with the bot, you need to create a new account strictly via the link from the bot "
+        "and use the promo code <b>BLACK110</b>\n\n"
+        "If you opened the link and accessed an old account, you need to:\n"
+        "- Log out of the old account\n"
+        "- Close the website\n"
+        "- Reopen the link from the bot's button\n\n"
+        "<b>2- Complete the registration</b>\n\n"
+        "After successful registration, click the <b>Verify</b> button below."
+    )
+
     keyboard = [[InlineKeyboardButton(f"🔗 {lang_data['reg_btn']}", url="https://1wezue.com/casino")],[InlineKeyboardButton(f"{lang_data['verify_btn']}", callback_data='verify_reg')],[InlineKeyboardButton(f"🆘 {lang_data['help_btn']}", url="https://t.me/SUNNY_BRO1")]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
     await query.message.delete()
-    await context.bot.send_photo(chat_id=update.effective_chat.id, photo=IMAGE_URL_REG, caption=info_text, parse_mode='HTML', reply_markup=InlineKeyboardMarkup(keyboard))
+    await context.bot.send_photo(chat_id=update.effective_chat.id, photo=IMAGE_URL_REG, caption=info_text, parse_mode='HTML', reply_markup=reply_markup)
     return ConversationHandler.END
 
 async def verify_process_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
+    
     chat_id = update.effective_chat.id
-    lang_data = LANGUAGES.get(context.user_data.get('selected_lang', 'en'), LANGUAGES['en'])
+    lang_code = context.user_data.get('selected_lang', 'en')
+    lang_data = LANGUAGES.get(lang_code, LANGUAGES['en'])
 
     msg = await context.bot.send_message(chat_id=chat_id, text="⏳ Checking synchronization... Please wait 5 seconds.")
     await asyncio.sleep(5) 
-    try: await context.bot.delete_message(chat_id=chat_id, message_id=msg.message_id)
+    
+    try:
+        await context.bot.delete_message(chat_id=chat_id, message_id=msg.message_id)
     except: pass
+
     await context.bot.send_message(chat_id=chat_id, text=lang_data['ask_id'])
     return WAITING_FOR_ID
 
 async def receive_id(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id_text = update.message.text.strip()
+    context.user_data['user_provided_id'] = user_id_text
+    
     user = update.effective_user
     chat_id = update.effective_chat.id
-    lang_data = LANGUAGES.get(context.user_data.get('selected_lang', 'en'), LANGUAGES['en'])
+    lang_code = context.user_data.get('selected_lang', 'en')
+    lang_data = LANGUAGES.get(lang_code, LANGUAGES['en'])
 
     analyzing_msg = await update.message.reply_text(f"⏳ {lang_data['analyzing']}")
-    admin_text = f"🚨 <b>New Auto-Verified User!</b>\n👤 Name: {user.first_name}\n🆔 Telegram ID: {user.id}\n📝 <b>1Win ID:</b> <code>{user_id_text}</code>\n✅ <i>Bot has auto-approved this user.</i>"
-    try: await context.bot.send_message(chat_id=ADMIN_ID, text=admin_text, parse_mode='HTML')
+
+    admin_text = (
+        f"🚨 <b>New Auto-Verified User!</b>\n"
+        f"👤 Name: {user.first_name}\n"
+        f"🆔 Telegram ID: {user.id}\n"
+        f"📝 <b>1Win ID:</b> <code>{user_id_text}</code>\n"
+        f"✅ <i>Bot has auto-approved this user.</i>"
+    )
+    try:
+        await context.bot.send_message(chat_id=ADMIN_ID, text=admin_text, parse_mode='HTML')
     except Exception: pass
 
     await asyncio.sleep(2)
-    try: await context.bot.delete_message(chat_id=chat_id, message_id=analyzing_msg.message_id)
+    
+    try:
+        await context.bot.delete_message(chat_id=chat_id, message_id=analyzing_msg.message_id)
     except: pass
 
-    keyboard = [[InlineKeyboardButton(f"🎮 {lang_data['play_btn']}", callback_data='play_hack_action')],[InlineKeyboardButton(f"📺 {lang_data['guide_btn']}", url=HOW_TO_USE_LINK)]]
-    await context.bot.send_photo(chat_id=chat_id, photo=IMAGE_URL_SUCCESS, caption=lang_data['success_msg'], parse_mode='HTML', reply_markup=InlineKeyboardMarkup(keyboard))
+    final_keyboard = [[InlineKeyboardButton(f"🎮 {lang_data['play_btn']}", callback_data='play_hack_action')],[InlineKeyboardButton(f"📺 {lang_data['guide_btn']}", url=HOW_TO_USE_LINK)]]
+    reply_markup = InlineKeyboardMarkup(final_keyboard)
+
+    await context.bot.send_photo(chat_id=chat_id, photo=IMAGE_URL_SUCCESS, caption=lang_data['success_msg'], parse_mode='HTML', reply_markup=reply_markup)
     return ConversationHandler.END
 
 async def play_hack_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
-    lang_data = LANGUAGES.get(context.user_data.get('selected_lang', 'en'), LANGUAGES['en'])
+    lang_code = context.user_data.get('selected_lang', 'en')
+    lang_data = LANGUAGES.get(lang_code, LANGUAGES['en'])
 
     keyboard = [[InlineKeyboardButton("✈️ Aviator", callback_data='game_aviator')],[InlineKeyboardButton("💣 Mines", callback_data='game_mines')],[InlineKeyboardButton("⚽ Penalty", callback_data='game_penalty')],[InlineKeyboardButton("👑 King Thimbles", callback_data='game_king_thimbles')]]
-    try: await query.message.delete()
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    try:
+        await query.message.delete()
     except: pass
-    await context.bot.send_photo(chat_id=update.effective_chat.id, photo=IMAGE_URL_HACK_MENU, caption=lang_data['select_game'], parse_mode='HTML', reply_markup=InlineKeyboardMarkup(keyboard))
+    
+    await context.bot.send_photo(chat_id=update.effective_chat.id, photo=IMAGE_URL_HACK_MENU, caption=lang_data['select_game'], parse_mode='HTML', reply_markup=reply_markup)
 
 async def game_selection_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
+    game_type = query.data
+    
     logos = {'game_aviator': (LOGO_AVIATOR, "Aviator", LINK_AVIATOR), 'game_mines': (LOGO_MINES, "Mines", LINK_MINES), 'game_penalty': (LOGO_PENALTY, "Penalty", LINK_PENALTY), 'game_king_thimbles': (LOGO_KING_THIMBLES, "King Thimbles", LINK_KING_THIMBLES)}
-    logo_url, game_name, hack_url = logos.get(query.data, logos['game_aviator'])
+    logo_url, game_name, hack_url = logos.get(game_type, logos['game_aviator'])
 
     keyboard = [[InlineKeyboardButton(f"📱 Open {game_name} Hack", web_app=WebAppInfo(url=hack_url))],[InlineKeyboardButton("🔙 Back", callback_data='play_hack_action')]]
-    try: await query.message.delete()
-    except: pass
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
     try:
-        await context.bot.send_photo(chat_id=update.effective_chat.id, photo=logo_url, caption=f"<b>{game_name} Hack Connected!</b>\n\nClick the button below to access the hack tool.", parse_mode='HTML', reply_markup=InlineKeyboardMarkup(keyboard))
+        await query.message.delete()
+    except: pass
+    
+    try:
+        await context.bot.send_photo(chat_id=update.effective_chat.id, photo=logo_url, caption=f"<b>{game_name} Hack Connected!</b>\n\nClick the button below to access the hack tool.", parse_mode='HTML', reply_markup=reply_markup)
     except Exception:
-        await context.bot.send_message(chat_id=update.effective_chat.id, text=f"<b>{game_name} Selected.</b>\nClick below:", parse_mode='HTML', reply_markup=InlineKeyboardMarkup(keyboard))
+        await context.bot.send_message(chat_id=update.effective_chat.id, text=f"<b>{game_name} Selected.</b>\nClick below:", parse_mode='HTML', reply_markup=reply_markup)
 
 # ================= ADMIN HANDLERS =================
 async def admin_panel(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if update.effective_user.id != ADMIN_ID: return ConversationHandler.END
+    if update.effective_user.id != ADMIN_ID:
+        return ConversationHandler.END
+
     users = get_users()
     msg = f"👑 <b>ADMIN PANEL</b> 👑\n\n👥 <b>Total Users:</b> {len(users)}\nChoose an option below:"
-    keyboard = [[InlineKeyboardButton("📝 Plain Broadcast", callback_data='admin_simple_broadcast')],[InlineKeyboardButton("🔗 Custom Button Broadcast", callback_data='admin_btn_broadcast')],[InlineKeyboardButton("✨ Signal Broadcast (Auto Button)", callback_data='admin_auto_signal_broadcast')],[InlineKeyboardButton("❌ Close", callback_data='admin_close')]]
+    keyboard = [[InlineKeyboardButton("📝 Plain Broadcast", callback_data='admin_simple_broadcast')],[InlineKeyboardButton("🔗 Custom Button Broadcast", callback_data='admin_btn_broadcast')],[InlineKeyboardButton("✨ Signal Broadcast (Auto Button)", callback_data='admin_auto_signal_broadcast')], [InlineKeyboardButton("❌ Close", callback_data='admin_close')]]
     await update.message.reply_text(msg, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode='HTML')
     return ConversationHandler.END
 
@@ -287,13 +353,17 @@ async def perform_simple_broadcast(update: Update, context: ContextTypes.DEFAULT
     users = get_users()
     count = 0
     status_msg = await update.message.reply_text(f"🚀 Sending Plain Broadcast to {len(users)} users...")
+    
     for uid in users:
         try:
-            if update.message.photo: await context.bot.send_photo(chat_id=int(uid), photo=update.message.photo[-1].file_id, caption=update.message.caption if update.message.caption else "")
-            else: await context.bot.send_message(chat_id=int(uid), text=update.message.text)
+            if update.message.photo:
+                await context.bot.send_photo(chat_id=int(uid), photo=update.message.photo[-1].file_id, caption=update.message.caption if update.message.caption else "")
+            else:
+                await context.bot.send_message(chat_id=int(uid), text=update.message.text)
             count += 1
         except Exception: pass
         await asyncio.sleep(0.05)
+        
     await status_msg.edit_text(f"✅ Plain Broadcast Sent to {count} users.")
     return ConversationHandler.END
 
@@ -326,10 +396,13 @@ async def perform_btn_broadcast(update: Update, context: ContextTypes.DEFAULT_TY
     users = get_users()
     count = 0
     status_msg = await update.message.reply_text(f"🚀 Sending Custom Button Broadcast to {len(users)} users...")
+
     for uid in users:
         try:
-            if context.user_data['bc_type'] == 'photo': await context.bot.send_photo(chat_id=int(uid), photo=context.user_data['bc_photo'], caption=context.user_data['bc_caption'], reply_markup=reply_markup)
-            else: await context.bot.send_message(chat_id=int(uid), text=context.user_data['bc_text'], reply_markup=reply_markup)
+            if context.user_data['bc_type'] == 'photo':
+                await context.bot.send_photo(chat_id=int(uid), photo=context.user_data['bc_photo'], caption=context.user_data['bc_caption'], reply_markup=reply_markup)
+            else:
+                await context.bot.send_message(chat_id=int(uid), text=context.user_data['bc_text'], reply_markup=reply_markup)
             count += 1
         except Exception: pass
         await asyncio.sleep(0.05)
@@ -346,10 +419,13 @@ async def perform_auto_signal_broadcast(update: Update, context: ContextTypes.DE
     count = 0
     status_msg = await update.message.reply_text(f"🚀 Sending Signal Broadcast to {len(users)} users...")
     auto_markup = InlineKeyboardMarkup([[InlineKeyboardButton("GET SIGNAL✨", callback_data='restart_bot_action')]])
+
     for uid in users:
         try:
-            if update.message.photo: await context.bot.send_photo(chat_id=int(uid), photo=update.message.photo[-1].file_id, caption=update.message.caption if update.message.caption else "", reply_markup=auto_markup)
-            else: await context.bot.send_message(chat_id=int(uid), text=update.message.text, reply_markup=auto_markup)
+            if update.message.photo:
+                await context.bot.send_photo(chat_id=int(uid), photo=update.message.photo[-1].file_id, caption=update.message.caption if update.message.caption else "", reply_markup=auto_markup)
+            else:
+                await context.bot.send_message(chat_id=int(uid), text=update.message.text, reply_markup=auto_markup)
             count += 1
         except Exception: pass
         await asyncio.sleep(0.05)
@@ -363,7 +439,8 @@ async def close_admin(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return ConversationHandler.END 
 
 async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if update.message: await update.message.reply_text("❌ Action Cancelled. Send /start to restart.")
+    if update.message:
+        await update.message.reply_text("❌ Action Cancelled. Send /start to restart.")
     return ConversationHandler.END
 
 # ================= MAIN =================
