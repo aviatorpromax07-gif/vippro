@@ -1,62 +1,79 @@
 import logging
-import asyncio
 import os
-import threading
-from http.server import BaseHTTPRequestHandler, HTTPServer
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, ChatMember, WebAppInfo
+import asyncio
+import sys
+import json
+from threading import Thread
+from flask import Flask
+import firebase_admin
+from firebase_admin import credentials, db
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, WebAppInfo
 from telegram.ext import (
-    ApplicationBuilder, 
-    ContextTypes, 
-    CommandHandler, 
-    CallbackQueryHandler, 
-    MessageHandler, 
-    filters, 
+    ApplicationBuilder,
+    ContextTypes,
+    CommandHandler,
+    CallbackQueryHandler,
+    MessageHandler,
+    filters,
     ConversationHandler
 )
-from telegram.error import BadRequest, Forbidden
 
-# ================= FIREBASE SETUP (Direct Dictionary) =================
-import firebase_admin
-from firebase_admin import credentials, firestore
+# ================= লগিং সেটআপ =================
+logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s', level=logging.INFO)
+logger = logging.getLogger(__name__)
 
-# আপনার দেওয়া Firebase JSON ডেটা সরাসরি এখানে বসিয়ে দেওয়া হয়েছে
-FIREBASE_CREDS_DICT = {
-  "type": "service_account",
-  "project_id": "winbot-eea9a",
-  "private_key_id": "0fc394504ed2eb8954ec426bbe11f46eec38ffb0",
-  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDGPOJtItY6HTIS\nqr+K+wiVmjaa1hl+qpRlHH6AjdUHVEIoVteooVHleZW/XlJZRyNMnp0fnqcChb/9\n5uXbLreay1UEnmwFUmxoqGADbxh9FSrCoyczrIGXr3EfoENxH9wVU8dtwlK6g1fY\nl0e8btmweoTsDt8qCA1BfaOBKccWCFkkg2wu8zVqghTOCw09/upzgTPALvuwDcDC\nWNpYzj87y2j+f2CMdu4RRiDZ+VosIIhSAAV1Y193UELcZDTv5/Wlj6mbKWb+O0xK\n8Yp5Z3LS/Yg4T+IsDHCxmk+3Ul3qPNb8Avuy0HuWBEgwj4rqxBoMMTjUIopp1h69\nxzbFkKu7AgMBAAECggEAAXVeNxkBWXvF1rRR5McJs6Fm/cb4eLbu5jrfmrjbFIrj\n/QxShDJCT31lrXrsq9fQTyvVkm97jBMJgWfgULdXG3jxKa+0B2qpUzB18GCHXhg4\nmyZRz1lZZLvM3xjclimlWAoolp/44C1qM9+SZApZaKkmGYnXI3sxWcYqXJ9pkGRr\nrSPZw77hY3H+2ByNO6mBGYR+yecjvTOUcBZuIqgkEmv+dRhec/QllmXZCDTYyWWM\nj6iAA1ARAQ9tep5tsv4tDUI801v24SJ0ulQLDFvaEZ16fSBu0fTnjDYeK8ukSQYB\nNfUbfGQRLeeii8XCktPtP47Vda5x9kM3ANRJdJ7FmQKBgQDwLRqqKXgjumOmY78F\ndvP/p5iYaH1nsEJ6m/JxgzyHIwhu1xS7v7KRyjLZyxTD614FK15qh3nX0A/Q2+M5\nQywNhMXnPPB01tMsFJTFKVb7TBa9XcVtQcV7XPHugceKAFUp3nQC1sw1lKKluFWb\nvuXKdkigHJ4EiNWERgoBfjyv6QKBgQDTTG7qDldWLs8UXVglwBpaMXGw/PEJxkiW\n8MHKCbhEfwU7PCB2yoB3mN+5tjPJ49g28J7FaklIwjBRxGFP3rVVtnJ2vyQzfr6n\nL1D6jAZUPLjmUWx8rCB2jWFL7eBxVlPc63tE33CMGpxq8oiBkyKsPf61pRLqNEP6\nzzCJIKA8AwKBgQCPi1WRd+F+8QpXyuvDF1ozZPZ1uJWi4ByLbSMUpswJNG342QFi\nSOsv6TpFIvQROF3kFwyB/OBclNSvDoyaj8QHfGBPmQNZwX9KrC5SPCfpX4uDuESj\nzRh7Z4yM8PHST+qWcIbDn59DMseW5jn8MLbkL5euYgwrR6DdQoL+a3VX6QKBgQCC\nKe+Zl8QNf0Bp1ybZ+oFBVnwm/2qtDszgzudSQrKU33qlhuCozQ5ennoTuT4l/InR\nLmFgU51ZiOajOEqKHTOv3Xid1hnC7y0baHaGIYQ0mEN+/mHKW26UGXv6fktpBjkb\nOqTxRIPcivgYmdelmrIdUQN7enkwdYn7E29eyg5raQKBgG/kppUI/hJy0sA2TkWW\nIS/poxxHLw3VO2mNDJKhW+n1okzJ2x3Ftx3han2AlAUXmLXiOH+R0GKRpT7Xtz8J\nDP4rNxnZJ8smPuWIC4YbI9kEDrF4Pgd2USmawrycMqZdcTJ6jtSMHUdVJoTbgyd1\nicEVdXxDzM5IGdi42DcSyGBB\n-----END PRIVATE KEY-----\n",
-  "client_email": "firebase-adminsdk-fbsvc@winbot-eea9a.iam.gserviceaccount.com",
-  "client_id": "111122027484565922605",
-  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-  "token_uri": "https://oauth2.googleapis.com/token",
-  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
-  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-fbsvc%40winbot-eea9a.iam.gserviceaccount.com",
-  "universe_domain": "googleapis.com"
-}
-
-db = None
+# ================= ফায়ারবেস কানেকশন =================
 try:
-    cred = credentials.Certificate(FIREBASE_CREDS_DICT)
-    firebase_admin.initialize_app(cred)
-    db = firestore.client()
-    print("🔥 Firebase Connected Successfully!")
+    if not firebase_admin._apps:
+        firebase_json = os.environ.get("FIREBASE_JSON")
+        
+        if firebase_json:
+            cred_dict = json.loads(firebase_json)
+            cred = credentials.Certificate(cred_dict)
+            logger.info("✅ Firebase initialized from Environment Variable!")
+        elif os.path.exists("firebase-key.json"):
+            cred = credentials.Certificate("firebase-key.json")
+            logger.info("✅ Firebase initialized from firebase-key.json file!")
+        else:
+            logger.error("❌ No Firebase credentials found!")
+            sys.exit(1)
+
+        firebase_admin.initialize_app(cred, {
+            'databaseURL': 'https://telegram-60f96-default-rtdb.firebaseio.com/'
+        })
+    
+    db.reference('connection_test').set({'status': 'online'})
+    
 except Exception as e:
-    print(f"❌ Firebase Init Error: {e}")
+    logger.error(f"❌ Firebase Critical Error: {e}")
+    sys.exit(1) 
 
-# ================= RENDER DUMMY SERVER (পোর্টের ঝামেলা এড়াতে) =================
-class DummyHandler(BaseHTTPRequestHandler):
-    def do_GET(self):
-        self.send_response(200)
-        self.send_header("Content-type", "text/plain")
-        self.end_headers()
-        self.wfile.write(b"Bot is perfectly running on Render with Firebase!")
+# ================= ডাটাবেস ফাংশন =================
+def save_user_to_firebase(user):
+    try:
+        ref = db.reference(f'users/{user.id}')
+        if ref.get() is None:
+            ref.set({'id': user.id, 'first_name': user.first_name, 'username': user.username, 'status': 'active'})
+    except Exception as e:
+        logger.error(f"❌ Error saving user: {e}")
 
-def run_dummy_server():
-    port = int(os.environ.get("PORT", 10000))
-    server = HTTPServer(("0.0.0.0", port), DummyHandler)
-    server.serve_forever()
+def get_all_users():
+    try:
+        ref = db.reference('users')
+        users = ref.get()
+        return list(users.keys()) if users else []
+    except: return []
 
-# ================= CONFIGURATION =================
+# ================= ওয়েব সার্ভার =================
+app = Flask(__name__)
+@app.route('/')
+def home(): return "Bot is Online"
+
+def run_flask():
+    port = int(os.environ.get("PORT", 8080))
+    app.run(host='0.0.0.0', port=port)
+
+# ================= বটের কনফিগারেশন =================
 BOT_TOKEN = os.getenv("BOT_TOKEN", "8525057709:AAE6kuNKFx1xtsp7HvhJygTXZZval9iE278")
 ADMIN_ID = int(os.getenv("ADMIN_ID", "1146186608"))
 REQUIRED_CHANNEL = int(os.getenv("REQUIRED_CHANNEL", "-1001481593780"))
@@ -86,7 +103,13 @@ USER_FILE = "users.txt"
 
 # --- CONVERSATION STATES ---
 WAITING_FOR_ID = 0
-(BROADCAST_SIMPLE, BTN_BROADCAST_CONTENT, BTN_BROADCAST_LABEL, BTN_BROADCAST_LINK, BROADCAST_AUTO_SIGNAL) = range(2, 7)
+(
+    BROADCAST_SIMPLE,
+    BTN_BROADCAST_CONTENT,
+    BTN_BROADCAST_LABEL,
+    BTN_BROADCAST_LINK,
+    BROADCAST_AUTO_SIGNAL
+) = range(2, 7)
 
 # --- LANGUAGE CONFIG ---
 LANGUAGES = {
@@ -100,41 +123,18 @@ LANGUAGES = {
     'br': {'name': '🇧🇷 Brazil', 'earn_btn': 'Começar a Ganhar Dinheiro', 'reg_btn': 'Registro', 'verify_btn': '✅ Eu me Registrei', 'ask_id': 'Envie seu ID de 9 dígitos:', 'analyzing': '🔄 Analisando...', 'success_msg': '✅ <b>Conta Verificada!</b>', 'play_btn': 'Play With Hack', 'guide_btn': 'Como usar', 'help_btn': 'Ajuda', 'select_game': 'Selecionar Jogo:'}
 }
 
-# ================= DATABASE FUNCTIONS (FIREBASE + LOCAL) =================
-def get_users_local():
+# ================= DATABASE FUNCTIONS =================
+def save_user(user_id):
+    users = get_users()
+    if str(user_id) not in users:
+        with open(USER_FILE, "a") as f:
+            f.write(f"{user_id}\n")
+
+def get_users():
     if not os.path.exists(USER_FILE):
         return[]
     with open(USER_FILE, "r") as f:
         return [line.strip() for line in f.readlines()]
-
-def get_users():
-    users_set = set(get_users_local())
-    if db:
-        try:
-            docs = db.collection('bot_users').stream()
-            for doc in docs:
-                users_set.add(doc.id)
-        except Exception as e:
-            logging.error(f"Firebase get error: {e}")
-    return list(users_set)
-
-def save_user(user_id):
-    user_id_str = str(user_id)
-    
-    # 1. Save locally as backup
-    users_local = get_users_local()
-    if user_id_str not in users_local:
-        with open(USER_FILE, "a") as f:
-            f.write(f"{user_id_str}\n")
-            
-    # 2. Save to Firebase
-    if db:
-        try:
-            doc_ref = db.collection('bot_users').document(user_id_str)
-            if not doc_ref.get().exists:
-                doc_ref.set({"id": user_id_str})
-        except Exception as e:
-            logging.error(f"Firebase save error: {e}")
 
 # ================= UTILITY FUNCTIONS =================
 async def check_membership(user_id: int, context: ContextTypes.DEFAULT_TYPE):
@@ -155,22 +155,29 @@ async def send_language_menu(update: Update, context: ContextTypes.DEFAULT_TYPE)
         [InlineKeyboardButton(LANGUAGES['pk']['name'], callback_data='lang_pk'),
          InlineKeyboardButton(LANGUAGES['bd']['name'], callback_data='lang_bd')],
         [InlineKeyboardButton(LANGUAGES['id']['name'], callback_data='lang_id'),
-         InlineKeyboardButton(LANGUAGES['ru']['name'], callback_data='lang_ru')],
-        [InlineKeyboardButton(LANGUAGES['tr']['name'], callback_data='lang_tr'),
+         InlineKeyboardButton(LANGUAGES['ru']['name'], callback_data='lang_ru')],[InlineKeyboardButton(LANGUAGES['tr']['name'], callback_data='lang_tr'),
          InlineKeyboardButton(LANGUAGES['br']['name'], callback_data='lang_br')],
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     
     if update.callback_query:
         await update.callback_query.message.delete()
-        await context.bot.send_message(chat_id=update.effective_chat.id, text=welcome_text, reply_markup=reply_markup)
+        await context.bot.send_message(
+            chat_id=update.effective_chat.id, 
+            text=welcome_text, 
+            reply_markup=reply_markup
+        )
     else:
-        await context.bot.send_message(chat_id=update.effective_chat.id, text=welcome_text, reply_markup=reply_markup)
+        await context.bot.send_message(
+            chat_id=update.effective_chat.id, 
+            text=welcome_text, 
+            reply_markup=reply_markup
+        )
 
 # ================= HANDLERS =================
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
-    save_user(user_id) # ইউজার অটোমেটিক ফায়ারবেসে সেভ হবে
+    save_user(user_id)
     
     is_member = await check_membership(user_id, context)
     
@@ -182,8 +189,14 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "To use this bot, you must join our official Private channel first.\n"
             "Please join the channel and click 'Joined' button below."
         )
-        keyboard = [[InlineKeyboardButton("📢 Join Private Channel", url=CHANNEL_LINK)],[InlineKeyboardButton("✅ Joined / Verify", callback_data='check_join_status')]]
-        await context.bot.send_message(chat_id=user_id, text=join_text, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode='HTML')
+        keyboard = [[InlineKeyboardButton("📢 Join Private Channel", url=CHANNEL_LINK)],[InlineKeyboardButton("✅ Joined / Verify", callback_data='check_join_status')]
+        ]
+        await context.bot.send_message(
+            chat_id=user_id, 
+            text=join_text, 
+            reply_markup=InlineKeyboardMarkup(keyboard), 
+            parse_mode='HTML'
+        )
     return ConversationHandler.END
 
 async def restart_bot_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -215,9 +228,18 @@ async def language_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     await query.message.delete()
     try:
-        await context.bot.send_photo(chat_id=update.effective_chat.id, photo=IMAGE_URL_WELCOME, caption=f"Language: {lang_data['name']}\n\nClick below to proceed:", reply_markup=reply_markup)
+        await context.bot.send_photo(
+            chat_id=update.effective_chat.id,
+            photo=IMAGE_URL_WELCOME,
+            caption=f"Language: {lang_data['name']}\n\nClick below to proceed:",
+            reply_markup=reply_markup
+        )
     except Exception as e:
-        await context.bot.send_message(chat_id=update.effective_chat.id, text="Click below to start:", reply_markup=reply_markup)
+        await context.bot.send_message(
+            chat_id=update.effective_chat.id,
+            text="Click below to start:",
+            reply_markup=reply_markup
+        )
     return ConversationHandler.END
 
 async def show_registration_info(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -239,11 +261,19 @@ async def show_registration_info(update: Update, context: ContextTypes.DEFAULT_T
         "After successful registration, click the <b>Verify</b> button below."
     )
 
-    keyboard = [[InlineKeyboardButton(f"🔗 {lang_data['reg_btn']}", url="https://1wezue.com/casino")],[InlineKeyboardButton(f"{lang_data['verify_btn']}", callback_data='verify_reg')],[InlineKeyboardButton(f"🆘 {lang_data['help_btn']}", url="https://t.me/SUNNY_BRO1")]]
+    keyboard = [
+        [InlineKeyboardButton(f"🔗 {lang_data['reg_btn']}", url="https://1wezue.com/casino")],[InlineKeyboardButton(f"{lang_data['verify_btn']}", callback_data='verify_reg')],[InlineKeyboardButton(f"🆘 {lang_data['help_btn']}", url="https://t.me/SUNNY_BRO1")]
+    ]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
     await query.message.delete()
-    await context.bot.send_photo(chat_id=update.effective_chat.id, photo=IMAGE_URL_REG, caption=info_text, parse_mode='HTML', reply_markup=reply_markup)
+    await context.bot.send_photo(
+        chat_id=update.effective_chat.id,
+        photo=IMAGE_URL_REG,
+        caption=info_text,
+        parse_mode='HTML',
+        reply_markup=reply_markup
+    )
     return ConversationHandler.END
 
 async def verify_process_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -254,14 +284,21 @@ async def verify_process_start(update: Update, context: ContextTypes.DEFAULT_TYP
     lang_code = context.user_data.get('selected_lang', 'en')
     lang_data = LANGUAGES.get(lang_code, LANGUAGES['en'])
 
-    msg = await context.bot.send_message(chat_id=chat_id, text="⏳ Checking synchronization... Please wait 5 seconds.")
+    msg = await context.bot.send_message(
+        chat_id=chat_id, 
+        text="⏳ Checking synchronization... Please wait 5 seconds."
+    )
+    # সময় কমিয়ে ৫ সেকেন্ড করে দেওয়া হয়েছে যাতে ইউজার বিরক্ত না হয়
     await asyncio.sleep(5) 
     
     try:
         await context.bot.delete_message(chat_id=chat_id, message_id=msg.message_id)
     except: pass
 
-    await context.bot.send_message(chat_id=chat_id, text=lang_data['ask_id'])
+    await context.bot.send_message(
+        chat_id=chat_id, 
+        text=lang_data['ask_id']
+    )
     return WAITING_FOR_ID
 
 async def receive_id(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -284,7 +321,8 @@ async def receive_id(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
     try:
         await context.bot.send_message(chat_id=ADMIN_ID, text=admin_text, parse_mode='HTML')
-    except Exception: pass
+    except Exception:
+        pass
 
     await asyncio.sleep(2)
     
@@ -292,36 +330,73 @@ async def receive_id(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await context.bot.delete_message(chat_id=chat_id, message_id=analyzing_msg.message_id)
     except: pass
 
-    final_keyboard = [[InlineKeyboardButton(f"🎮 {lang_data['play_btn']}", callback_data='play_hack_action')],[InlineKeyboardButton(f"📺 {lang_data['guide_btn']}", url=HOW_TO_USE_LINK)]]
+    final_keyboard = [[InlineKeyboardButton(f"🎮 {lang_data['play_btn']}", callback_data='play_hack_action')],[InlineKeyboardButton(f"📺 {lang_data['guide_btn']}", url=HOW_TO_USE_LINK)]
+    ]
     reply_markup = InlineKeyboardMarkup(final_keyboard)
 
-    await context.bot.send_photo(chat_id=chat_id, photo=IMAGE_URL_SUCCESS, caption=lang_data['success_msg'], parse_mode='HTML', reply_markup=reply_markup)
+    await context.bot.send_photo(
+        chat_id=chat_id,
+        photo=IMAGE_URL_SUCCESS,
+        caption=lang_data['success_msg'],
+        parse_mode='HTML',
+        reply_markup=reply_markup
+    )
     return ConversationHandler.END
 
 async def play_hack_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
+
     lang_code = context.user_data.get('selected_lang', 'en')
     lang_data = LANGUAGES.get(lang_code, LANGUAGES['en'])
 
-    keyboard = [[InlineKeyboardButton("✈️ Aviator", callback_data='game_aviator')],[InlineKeyboardButton("💣 Mines", callback_data='game_mines')],[InlineKeyboardButton("⚽ Penalty", callback_data='game_penalty')],[InlineKeyboardButton("👑 King Thimbles", callback_data='game_king_thimbles')]]
+    keyboard =[
+        [InlineKeyboardButton("✈️ Aviator", callback_data='game_aviator')],[InlineKeyboardButton("💣 Mines", callback_data='game_mines')],[InlineKeyboardButton("⚽ Penalty", callback_data='game_penalty')],[InlineKeyboardButton("👑 King Thimbles", callback_data='game_king_thimbles')],
+    ]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
     try:
         await query.message.delete()
-    except: pass
+    except:
+        pass
     
-    await context.bot.send_photo(chat_id=update.effective_chat.id, photo=IMAGE_URL_HACK_MENU, caption=lang_data['select_game'], parse_mode='HTML', reply_markup=reply_markup)
+    await context.bot.send_photo(
+        chat_id=update.effective_chat.id,
+        photo=IMAGE_URL_HACK_MENU,
+        caption=lang_data['select_game'],
+        parse_mode='HTML',
+        reply_markup=reply_markup
+    )
 
 async def game_selection_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
-    game_type = query.data
     
-    logos = {'game_aviator': (LOGO_AVIATOR, "Aviator", LINK_AVIATOR), 'game_mines': (LOGO_MINES, "Mines", LINK_MINES), 'game_penalty': (LOGO_PENALTY, "Penalty", LINK_PENALTY), 'game_king_thimbles': (LOGO_KING_THIMBLES, "King Thimbles", LINK_KING_THIMBLES)}
-    logo_url, game_name, hack_url = logos.get(game_type, logos['game_aviator'])
+    game_type = query.data
+    logo_url = LOGO_AVIATOR
+    game_name = "Aviator"
+    hack_url = LINK_AVIATOR
 
-    keyboard = [[InlineKeyboardButton(f"📱 Open {game_name} Hack", web_app=WebAppInfo(url=hack_url))],[InlineKeyboardButton("🔙 Back", callback_data='play_hack_action')]]
+    if game_type == 'game_aviator':
+        logo_url = LOGO_AVIATOR
+        game_name = "Aviator"
+        hack_url = LINK_AVIATOR
+    elif game_type == 'game_mines':
+        logo_url = LOGO_MINES
+        game_name = "Mines"
+        hack_url = LINK_MINES
+    elif game_type == 'game_penalty':
+        logo_url = LOGO_PENALTY
+        game_name = "Penalty"
+        hack_url = LINK_PENALTY
+    elif game_type == 'game_king_thimbles':
+        logo_url = LOGO_KING_THIMBLES
+        game_name = "King Thimbles"
+        hack_url = LINK_KING_THIMBLES
+
+    keyboard = [[InlineKeyboardButton(f"📱 Open {game_name} Hack", web_app=WebAppInfo(url=hack_url))],
+        [InlineKeyboardButton("🔙 Back", callback_data='play_hack_action')]
+    ]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
     try:
@@ -329,9 +404,20 @@ async def game_selection_handler(update: Update, context: ContextTypes.DEFAULT_T
     except: pass
     
     try:
-        await context.bot.send_photo(chat_id=update.effective_chat.id, photo=logo_url, caption=f"<b>{game_name} Hack Connected!</b>\n\nClick the button below to access the hack tool.", parse_mode='HTML', reply_markup=reply_markup)
-    except Exception:
-        await context.bot.send_message(chat_id=update.effective_chat.id, text=f"<b>{game_name} Selected.</b>\nClick below:", parse_mode='HTML', reply_markup=reply_markup)
+        await context.bot.send_photo(
+            chat_id=update.effective_chat.id,
+            photo=logo_url,
+            caption=f"<b>{game_name} Hack Connected!</b>\n\nClick the button below to access the hack tool.",
+            parse_mode='HTML',
+            reply_markup=reply_markup
+        )
+    except Exception as e:
+        await context.bot.send_message(
+            chat_id=update.effective_chat.id,
+            text=f"<b>{game_name} Selected.</b>\nClick below:",
+            parse_mode='HTML',
+            reply_markup=reply_markup
+        )
 
 # ================= ADMIN HANDLERS =================
 async def admin_panel(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -339,14 +425,29 @@ async def admin_panel(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return ConversationHandler.END
 
     users = get_users()
-    msg = f"👑 <b>ADMIN PANEL</b> 👑\n\n👥 <b>Total Users:</b> {len(users)}\nChoose an option below:"
-    keyboard = [[InlineKeyboardButton("📝 Plain Broadcast", callback_data='admin_simple_broadcast')],[InlineKeyboardButton("🔗 Custom Button Broadcast", callback_data='admin_btn_broadcast')],[InlineKeyboardButton("✨ Signal Broadcast (Auto Button)", callback_data='admin_auto_signal_broadcast')], [InlineKeyboardButton("❌ Close", callback_data='admin_close')]]
-    await update.message.reply_text(msg, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode='HTML')
+    msg = (
+        f"👑 <b>ADMIN PANEL</b> 👑\n\n"
+        f"👥 <b>Total Users:</b> {len(users)}\n"
+        f"Choose an option below:"
+    )
+    
+    keyboard = [[InlineKeyboardButton("📝 Plain Broadcast", callback_data='admin_simple_broadcast')],
+        [InlineKeyboardButton("🔗 Custom Button Broadcast", callback_data='admin_btn_broadcast')],[InlineKeyboardButton("✨ Signal Broadcast (Auto Button)", callback_data='admin_auto_signal_broadcast')],
+        [InlineKeyboardButton("❌ Close", callback_data='admin_close')]
+    ]
+    await update.message.reply_text(
+        msg, 
+        reply_markup=InlineKeyboardMarkup(keyboard), 
+        parse_mode='HTML'
+    )
     return ConversationHandler.END
 
 async def start_simple_broadcast(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.callback_query.answer()
-    await update.callback_query.message.edit_text("📝 <b>Plain Broadcast Mode</b>\n\nSend message (Text or Photo).\nType /cancel to cancel.", parse_mode='HTML')
+    await update.callback_query.message.edit_text(
+        "📝 <b>Plain Broadcast Mode</b>\n\nSend message (Text or Photo).\nType /cancel to cancel.", 
+        parse_mode='HTML'
+    )
     return BROADCAST_SIMPLE
 
 async def perform_simple_broadcast(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -357,11 +458,19 @@ async def perform_simple_broadcast(update: Update, context: ContextTypes.DEFAULT
     for uid in users:
         try:
             if update.message.photo:
-                await context.bot.send_photo(chat_id=int(uid), photo=update.message.photo[-1].file_id, caption=update.message.caption if update.message.caption else "")
+                await context.bot.send_photo(
+                    chat_id=int(uid), 
+                    photo=update.message.photo[-1].file_id, 
+                    caption=update.message.caption if update.message.caption else ""
+                )
             else:
-                await context.bot.send_message(chat_id=int(uid), text=update.message.text)
+                await context.bot.send_message(
+                    chat_id=int(uid), 
+                    text=update.message.text
+                )
             count += 1
-        except Exception: pass
+        except Exception:
+            pass
         await asyncio.sleep(0.05)
         
     await status_msg.edit_text(f"✅ Plain Broadcast Sent to {count} users.")
@@ -369,7 +478,10 @@ async def perform_simple_broadcast(update: Update, context: ContextTypes.DEFAULT
 
 async def start_btn_broadcast(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.callback_query.answer()
-    await update.callback_query.message.edit_text("🔗 <b>Custom Button Broadcast</b>\n\nStep 1: Send Message Content.\nType /cancel to cancel.", parse_mode='HTML')
+    await update.callback_query.message.edit_text(
+        "🔗 <b>Custom Button Broadcast</b>\n\nStep 1: Send Message Content.\nType /cancel to cancel.", 
+        parse_mode='HTML'
+    )
     return BTN_BROADCAST_CONTENT
 
 async def get_btn_content(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -390,9 +502,13 @@ async def get_btn_label(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def perform_btn_broadcast(update: Update, context: ContextTypes.DEFAULT_TYPE):
     link = update.message.text.strip()
-    if not link.startswith(('http://', 'https://')): link = 'https://' + link
+    
+    if not link.startswith(('http://', 'https://')):
+        link = 'https://' + link
+
     label = context.user_data['bc_btn_label']
-    reply_markup = InlineKeyboardMarkup([[InlineKeyboardButton(label, url=link)]])
+    keyboard = [[InlineKeyboardButton(label, url=link)]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
     users = get_users()
     count = 0
     status_msg = await update.message.reply_text(f"🚀 Sending Custom Button Broadcast to {len(users)} users...")
@@ -400,42 +516,71 @@ async def perform_btn_broadcast(update: Update, context: ContextTypes.DEFAULT_TY
     for uid in users:
         try:
             if context.user_data['bc_type'] == 'photo':
-                await context.bot.send_photo(chat_id=int(uid), photo=context.user_data['bc_photo'], caption=context.user_data['bc_caption'], reply_markup=reply_markup)
+                await context.bot.send_photo(
+                    chat_id=int(uid), 
+                    photo=context.user_data['bc_photo'], 
+                    caption=context.user_data['bc_caption'], 
+                    reply_markup=reply_markup
+                )
             else:
-                await context.bot.send_message(chat_id=int(uid), text=context.user_data['bc_text'], reply_markup=reply_markup)
+                await context.bot.send_message(
+                    chat_id=int(uid), 
+                    text=context.user_data['bc_text'], 
+                    reply_markup=reply_markup
+                )
             count += 1
-        except Exception: pass
+        except Exception:
+            pass
         await asyncio.sleep(0.05)
     await status_msg.edit_text(f"✅ Custom Button Broadcast Sent to {count} users.")
     return ConversationHandler.END
 
 async def start_auto_signal_broadcast(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.callback_query.answer()
-    await update.callback_query.message.edit_text("✨ <b>Signal Broadcast Mode</b>\n\nSend message (Text or Photo).\n'GET SIGNAL✨' button will be added automatically.\nType /cancel to cancel.", parse_mode='HTML')
+    await update.callback_query.message.edit_text(
+        "✨ <b>Signal Broadcast Mode</b>\n\nSend message (Text or Photo).\n'GET SIGNAL✨' button will be added automatically.\nType /cancel to cancel.", 
+        parse_mode='HTML'
+    )
     return BROADCAST_AUTO_SIGNAL
 
 async def perform_auto_signal_broadcast(update: Update, context: ContextTypes.DEFAULT_TYPE):
     users = get_users()
     count = 0
     status_msg = await update.message.reply_text(f"🚀 Sending Signal Broadcast to {len(users)} users...")
-    auto_markup = InlineKeyboardMarkup([[InlineKeyboardButton("GET SIGNAL✨", callback_data='restart_bot_action')]])
+    
+    auto_keyboard = [[InlineKeyboardButton("GET SIGNAL✨", callback_data='restart_bot_action')]]
+    auto_markup = InlineKeyboardMarkup(auto_keyboard)
 
     for uid in users:
         try:
             if update.message.photo:
-                await context.bot.send_photo(chat_id=int(uid), photo=update.message.photo[-1].file_id, caption=update.message.caption if update.message.caption else "", reply_markup=auto_markup)
+                await context.bot.send_photo(
+                    chat_id=int(uid), 
+                    photo=update.message.photo[-1].file_id, 
+                    caption=update.message.caption if update.message.caption else "", 
+                    reply_markup=auto_markup
+                )
             else:
-                await context.bot.send_message(chat_id=int(uid), text=update.message.text, reply_markup=auto_markup)
+                await context.bot.send_message(
+                    chat_id=int(uid), 
+                    text=update.message.text, 
+                    reply_markup=auto_markup
+                )
             count += 1
-        except Exception: pass
+        except Exception:
+            pass
         await asyncio.sleep(0.05)
+        
     await status_msg.edit_text(f"✅ Signal Broadcast Sent to {count} users.")
     return ConversationHandler.END
 
 async def close_admin(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.callback_query.answer("Admin Panel Closed")
-    try: await update.callback_query.message.delete()
-    except Exception: pass
+    try:
+        await update.callback_query.message.delete()
+    except Exception:
+        pass
+    # এই রিটার্নটা না থাকার কারনেই অ্যাডমিন প্যানেল হ্যাং করতো আগে
     return ConversationHandler.END 
 
 async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -445,18 +590,29 @@ async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 # ================= MAIN =================
 if __name__ == '__main__':
-    logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
+    logging.basicConfig(
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+        level=logging.INFO
+    )
+    
+    # Render এর জন্য Dummy সার্ভার স্টার্ট করা হচ্ছে ব্যাকগ্রাউন্ডে
     threading.Thread(target=run_dummy_server, daemon=True).start()
     
-    if not os.path.exists(USER_FILE): open(USER_FILE, 'w').close()
+    if not os.path.exists(USER_FILE):
+        open(USER_FILE, 'w').close()
 
     application = ApplicationBuilder().token(BOT_TOKEN).build()
 
     verify_conv = ConversationHandler(
         entry_points=[CallbackQueryHandler(verify_process_start, pattern='^verify_reg$')],
-        states={WAITING_FOR_ID:[MessageHandler(filters.TEXT & ~filters.COMMAND, receive_id)]},
-        fallbacks=[CommandHandler('cancel', cancel), CommandHandler('admin', admin_panel)],
-        allow_reentry=True
+        states={
+            WAITING_FOR_ID:[MessageHandler(filters.TEXT & ~filters.COMMAND, receive_id)],
+        },
+        fallbacks=[
+            CommandHandler('cancel', cancel), 
+            CommandHandler('admin', admin_panel)
+        ],
+        allow_reentry=True # ইউজার অন্য বাটনে ক্লিক করলেও স্টাক হবে না
     )
 
     admin_conv = ConversationHandler(
@@ -468,20 +624,21 @@ if __name__ == '__main__':
         states={
             BROADCAST_SIMPLE:[MessageHandler((filters.TEXT | filters.PHOTO) & ~filters.COMMAND, perform_simple_broadcast)],
             BTN_BROADCAST_CONTENT:[MessageHandler((filters.TEXT | filters.PHOTO) & ~filters.COMMAND, get_btn_content)],
-            BTN_BROADCAST_LABEL:[MessageHandler(filters.TEXT & ~filters.COMMAND, get_btn_label)],
-            BTN_BROADCAST_LINK:[MessageHandler(filters.TEXT & ~filters.COMMAND, perform_btn_broadcast)],
+            BTN_BROADCAST_LABEL: [MessageHandler(filters.TEXT & ~filters.COMMAND, get_btn_label)],
+            BTN_BROADCAST_LINK: [MessageHandler(filters.TEXT & ~filters.COMMAND, perform_btn_broadcast)],
             BROADCAST_AUTO_SIGNAL:[MessageHandler((filters.TEXT | filters.PHOTO) & ~filters.COMMAND, perform_auto_signal_broadcast)],
         },
         fallbacks=[
             CommandHandler('cancel', cancel), 
             CommandHandler('admin', admin_panel),
-            CallbackQueryHandler(close_admin, pattern='^admin_close$')
+            CallbackQueryHandler(close_admin, pattern='^admin_close$') # অ্যাডমিন প্যানেল আর ফ্রিজ হবে না!
         ],
-        allow_reentry=True
+        allow_reentry=True # অ্যাডমিন এক ব্রডকাস্ট থেকে অন্য ব্রডকাস্টে সুইচ করলেও হ্যাং হবে না
     )
 
     application.add_handler(verify_conv)
     application.add_handler(admin_conv)
+
     application.add_handler(CommandHandler('start', start))
     application.add_handler(CommandHandler('admin', admin_panel))
     
