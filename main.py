@@ -46,7 +46,7 @@ LOGO_PENALTY = "https://i.ibb.co/5WzBdWX4/hqdefault.jpg"
 LOGO_KING_THIMBLES = "https://i.ibb.co/8LYwvg1j/maxresdefault.jpg"
 
 # --- HACK LINKS ---
-LINK_AVIATOR = "https://aviatorbahohacker.fwh.is/"
+LINK_AVIATOR = "https://aviatorgameadmin.netlify.app/"
 LINK_MINES = "https://mines-game-hack.netlify.app/"
 LINK_PENALTY = "https://pnalteaybot.netlify.app/"
 LINK_KING_THIMBLES = "https://kingthimblesbot.netlify.app/"
