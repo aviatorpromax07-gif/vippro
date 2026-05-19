@@ -13,13 +13,13 @@ from telegram.ext import (
     filters, 
     ConversationHandler
 )
-from telegram.error import BadRequest
+from telegram.error import BadRequest, Forbidden
 
 # --- ফায়ারবেস ইমপোর্ট ---
 import firebase_admin
 from firebase_admin import credentials, db
 
-# ================= RENDER DUMMY SERVER (পোর্টের ঝামেলা এড়াতে) =================
+# ================= RENDER DUMMY SERVER =================
 class DummyHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         self.send_response(200)
@@ -33,9 +33,13 @@ def run_dummy_server():
     server.serve_forever()
 
 # ================= FIREBASE SETUP =================
-# আপনার ছবি থেকে নেওয়া একদম অরিজিনাল ডেটাবেস লিংক
 FIREBASE_DB_URL = "https://telegrambotdb-d2b45-default-rtdb.asia-southeast1.firebasedatabase.app/"
-CREDENTIALS_FILE = "firebase_credentials.json"
+
+# রেন্ডারে Secret File কোথায় আছে তা চেক করার জন্য এই লজিক
+if os.path.exists("/etc/secrets/firebase_credentials.json"):
+    CREDENTIALS_FILE = "/etc/secrets/firebase_credentials.json"
+else:
+    CREDENTIALS_FILE = "firebase_credentials.json"
 
 try:
     if not firebase_admin._apps:
@@ -43,20 +47,21 @@ try:
         firebase_admin.initialize_app(cred, {
             'databaseURL': FIREBASE_DB_URL
         })
-        print("Firebase connected successfully! ✅")
+        print("========================================")
+        print("🔥 Firebase connected successfully! ✅ 🔥")
+        print("========================================")
 except Exception as e:
-    print(f"Error connecting to Firebase: {e}")
+    print("========================================")
+    print(f"❌ FIREBASE CONNECTION ERROR: {e} ❌")
+    print("========================================")
 
 # ================= CONFIGURATION =================
 BOT_TOKEN = os.getenv("BOT_TOKEN", "8525057709:AAE6kuNKFx1xtsp7HvhJygTXZZval9iE278")
-
-# ⚠️ যদি /admin কাজ না করে, তবে নিচের আইডিটি আপনার বর্তমান টেলিগ্রাম আইডির সাথে মিলিয়ে নিন!
-ADMIN_ID = int(os.getenv("ADMIN_ID", "1146186608")) 
-
+ADMIN_ID = int(os.getenv("ADMIN_ID", "1146186608"))
 REQUIRED_CHANNEL = int(os.getenv("REQUIRED_CHANNEL", "-1001481593780"))
 CHANNEL_LINK = "https://t.me/+3U0nMzWs4Aw0YjFl"
 
-# --- MEDIA LINKS (FIXED URLS) ---
+# --- MEDIA LINKS ---
 IMAGE_URL_WELCOME = "https://i.ibb.co/XfxnhBYY/file-000000006ac47206b9a3e5b41d2e17e1.png"
 IMAGE_URL_REG = "https://i.ibb.co/PZ5VTZVT/IMG-20260201-052425-386.jpg"
 IMAGE_URL_SUCCESS = "https://i.ibb.co/fdwt2s8D/file-00000000973471faba7ce65cd5c96718.png"
@@ -72,7 +77,6 @@ LINK_AVIATOR = "https://aviatorgameadmin.netlify.app/"
 LINK_MINES = "https://mines-game-hack.netlify.app/"
 LINK_PENALTY = "https://pnalteaybot.netlify.app/"
 LINK_KING_THIMBLES = "https://kingthimblesbot.netlify.app/"
-
 HOW_TO_USE_LINK = "https://youtube.com/@sunny_bro11?si=gYfOtXnKayCkZloF"
 
 # --- CONVERSATION STATES ---
@@ -103,9 +107,11 @@ def save_user(user_id):
             user_ref.set({
                 "status": "active"
             })
-            print(f"New user {user_id} saved to Firebase!")
+            print(f"✅ SUCCESS: New user {user_id} saved to Firebase!")
+        else:
+            print(f"ℹ️ INFO: User {user_id} already exists in Firebase.")
     except Exception as e:
-        print(f"Error saving to Firebase: {e}")
+        print(f"❌ ERROR saving user {user_id} to Firebase: {e}")
 
 def get_users():
     """ফায়ারবেস থেকে সব ইউজার লিস্ট আনা হচ্ছে"""
@@ -116,7 +122,7 @@ def get_users():
             return list(users_data.keys())
         return []
     except Exception as e:
-        print(f"Error fetching from Firebase: {e}")
+        print(f"❌ ERROR fetching users from Firebase: {e}")
         return []
 
 # ================= UTILITY FUNCTIONS =================
@@ -527,8 +533,6 @@ if __name__ == '__main__':
     application.add_handler(admin_conv)
 
     application.add_handler(CommandHandler('start', start))
-    
-    # 🌟 মূল অ্যাডমিন কমান্ড প্যানেল 🌟
     application.add_handler(CommandHandler('admin', admin_panel))
     
     application.add_handler(CallbackQueryHandler(check_join_callback, pattern='^check_join_status$'))
@@ -539,5 +543,5 @@ if __name__ == '__main__':
     application.add_handler(CallbackQueryHandler(close_admin, pattern='^admin_close$'))
     application.add_handler(CallbackQueryHandler(restart_bot_handler, pattern='^restart_bot_action$'))
 
-    print("Bot is perfectly running with Firebase...✅")
+    print("Bot is perfectly running... Checking Database logs soon! 🔍")
     application.run_polling()
