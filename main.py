@@ -69,12 +69,14 @@ IMAGE_URL_HACK_MENU = "https://i.ibb.co/C3YqyxJn/Data-Breach-at-Betting-Platform
 
 LOGO_AVIATOR = "https://i.ibb.co/PZBBDv85/images-9.jpg"
 LOGO_MINES = "https://i.ibb.co/MDVxth7x/images-8.jpg"
+LOGO_MINI_MINES = "https://i.ibb.co/MDVxth7x/images-8.jpg"
 LOGO_PENALTY = "https://i.ibb.co/5WzBdWX4/hqdefault.jpg"
 LOGO_KING_THIMBLES = "https://i.ibb.co/8LYwvg1j/maxresdefault.jpg"
 
 # --- HACK LINKS ---
 LINK_AVIATOR = "https://aviatorgameadmin.netlify.app/"
 LINK_MINES = "https://mines-game-hack.netlify.app/"
+LINK_MINI_MINES = "https://1xbet-melbet-apple.unaux.com/minsadmin.html"
 LINK_PENALTY = "https://pnalteaybot.netlify.app/"
 LINK_KING_THIMBLES = "https://kingthimblesbot.netlify.app/"
 HOW_TO_USE_LINK = "https://youtube.com/@sunny_bro11?si=gYfOtXnKayCkZloF"
@@ -86,7 +88,7 @@ WAITING_FOR_ID = 0
 # --- LANGUAGE CONFIG ---
 LANGUAGES = {
     'en': {'name': '🇺🇸 English', 'earn_btn': 'Start Earning Money', 'reg_btn': 'Registration Link', 'verify_btn': '✅ I have Registered (Verify)', 'ask_id': 'Please send your 9-digit Account ID:', 'analyzing': '🔄 Verifying your ID...', 'success_msg': '✅ <b>ACCOUNT VERIFIED!</b>\n\nYour account has been successfully synchronized.', 'play_btn': 'Play With Hack', 'guide_btn': 'How to use', 'help_btn': 'Help', 'select_game': 'Select a game to start hacking:'},
-    'hi': {'name': '🇮🇳 India (Hindi)', 'earn_btn': 'पैसे कमाना शुरू करें', 'reg_btn': 'पंजीकरण (Registration)', 'verify_btn': '✅ मैंने पंजीकरण किया है (Verify)', 'ask_id': 'कृपया अपनी 9-अंकीय खाता आईडी भेजें:', 'analyzing': '🔄 खाता जाँचा जा रहा है...', 'success_msg': '✅ <b>खाता सत्यापित!</b>', 'play_btn': 'Play With Hack', 'guide_btn': 'उपयोग कैसे करें', 'help_btn': 'मदद (Help)', 'select_game': 'गेम चुनें:'},
+    'hi': {'name': '🇮🇳 India (Hindi)', 'earn_btn': 'पैसे कमाना शुरू करें', 'reg_btn': 'पंजीकरण (Registration)', 'verify_btn': '✅ मैंने पंजीकरण किया है (Verify)', 'ask_id': 'कृपया अपनी 9-अंकीय खाता आईडी भेजें:', 'analyzing': '🔄 खाता जाँचा जा रहा है...', 'success_msg': '✅ <b>खाता सत्यापित!</b>', 'play_btn': 'Play With Hack', 'guide_btn': 'उपयोग कैसे करें', 'help_btn': 'मदদ (Help)', 'select_game': 'गेम चुनें:'},
     'pk': {'name': '🇵🇰 Pakistan (Urdu)', 'earn_btn': 'پیسہ کمانا شروع کریں', 'reg_btn': 'رجسٹریشن', 'verify_btn': '✅ میں نے رجسٹر کیا ہے (Verify)', 'ask_id': 'براہ کرم اپنی 9 ہندسوں کی اکاؤنٹ آئی ڈی بھیجیں:', 'analyzing': '🔄 چیکنگ...', 'success_msg': '✅ <b>اکاؤنٹ کی تصدیق ہوگئی!</b>', 'play_btn': 'Play With Hack', 'guide_btn': 'کیسے استعمال کریں', 'help_btn': 'مدد', 'select_game': 'گیم منتخب کریں:'},
     'bd': {'name': '🇧🇩 Bangladesh (Bangla)', 'earn_btn': 'টাকা আয় শুরু করুন', 'reg_btn': 'রেজিস্ট্রেশন লিংক', 'verify_btn': '✅ আমার রেজিস্ট্রেশন সম্পন্ন হয়েছে', 'ask_id': 'অনুগ্রহ করে আপনার ৯ ডিজিটের একাউন্ট আইডি দিন:', 'analyzing': '🔄 আপনার আইডি যাচাই করা হচ্ছে...', 'success_msg': '✅ <b>একাউন্ট ভেরিফাইড!</b>\n\nআপনার একাউন্টটি সফলভাবে বটের সাথে যুক্ত হয়েছে।', 'play_btn': 'Play With Hack', 'guide_btn': 'কিভাবে ব্যবহার করবেন', 'help_btn': 'সাহায্য', 'select_game': 'হ্যাক শুরু করতে একটি গেম সিলেক্ট করুন:'},
     'id': {'name': '🇮🇩 Indonesia', 'earn_btn': 'Mulai Hasilkan Uang', 'reg_btn': 'Pendaftaran', 'verify_btn': '✅ Saya Sudah Daftar', 'ask_id': 'Kirim ID 9 digit Anda:', 'analyzing': '🔄 Memeriksa...', 'success_msg': '✅ <b>Akun Terverifikasi!</b>', 'play_btn': 'Play With Hack', 'guide_btn': 'Cara pakai', 'help_btn': 'Bantuan', 'select_game': 'Pilih Game:'},
@@ -313,6 +315,7 @@ async def play_hack_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard =[
         [InlineKeyboardButton("✈️ Aviator", callback_data='game_aviator')],
         [InlineKeyboardButton("💣 Mines", callback_data='game_mines')],
+        [InlineKeyboardButton("💣 Mine Mines", callback_data='game_mini_mines')],
         [InlineKeyboardButton("⚽ Penalty", callback_data='game_penalty')],
         [InlineKeyboardButton("👑 King Thimbles", callback_data='game_king_thimbles')],
     ]
@@ -341,6 +344,10 @@ async def game_selection_handler(update: Update, context: ContextTypes.DEFAULT_T
         logo_url = LOGO_MINES
         game_name = "Mines"
         hack_url = LINK_MINES
+    elif game_type == 'game_mini_mines':
+        logo_url = LOGO_MINI_MINES
+        game_name = "Mine Mines"
+        hack_url = LINK_MINI_MINES
     elif game_type == 'game_penalty':
         logo_url = LOGO_PENALTY
         game_name = "Penalty"
