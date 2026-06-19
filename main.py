@@ -68,6 +68,7 @@ IMAGE_URL_SUCCESS = "https://i.ibb.co/fdwt2s8D/file-00000000973471faba7ce65cd5c9
 IMAGE_URL_HACK_MENU = "https://i.ibb.co/C3YqyxJn/Data-Breach-at-Betting-Platform-1win-Exposed-96-Million-Users.png"
 
 LOGO_AVIATOR = "https://i.ibb.co/PZBBDv85/images-9.jpg"
+LOGO_LUCKY_JET = "https://i.ibb.co/rRmGk474/1.jpg"  # Lucky Jet লোগো ইমেজ
 LOGO_MINES = "https://i.ibb.co/MDVxth7x/images-8.jpg"
 LOGO_MINI_MINES = "https://i.ibb.co/MDVxth7x/images-8.jpg"
 LOGO_PENALTY = "https://i.ibb.co/5WzBdWX4/hqdefault.jpg"
@@ -75,6 +76,7 @@ LOGO_KING_THIMBLES = "https://i.ibb.co/8LYwvg1j/maxresdefault.jpg"
 
 # --- HACK LINKS ---
 LINK_AVIATOR = "https://aviatorgameadmin.netlify.app/"
+LINK_LUCKY_JET = "https://1xbet-melbet-apple.unaux.com/signal.html"  # আপনার দেওয়া Lucky Jet ওয়েব অ্যাপ লিংক
 LINK_MINES = "https://mines-game-hack.netlify.app/"
 LINK_MINI_MINES = "https://1xbet-melbet-apple.unaux.com/minsadmin.html"
 LINK_PENALTY = "https://pnalteaybot.netlify.app/"
@@ -89,7 +91,7 @@ WAITING_FOR_ID = 0
 LANGUAGES = {
     'en': {'name': '🇺🇸 English', 'earn_btn': 'Start Earning Money', 'reg_btn': 'Registration Link', 'verify_btn': '✅ I have Registered (Verify)', 'ask_id': 'Please send your 9-digit Account ID:', 'analyzing': '🔄 Verifying your ID...', 'success_msg': '✅ <b>ACCOUNT VERIFIED!</b>\n\nYour account has been successfully synchronized.', 'play_btn': 'Play With Hack', 'guide_btn': 'How to use', 'help_btn': 'Help', 'select_game': 'Select a game to start hacking:'},
     'hi': {'name': '🇮🇳 India (Hindi)', 'earn_btn': 'पैसे कमाना शुरू करें', 'reg_btn': 'पंजीकरण (Registration)', 'verify_btn': '✅ मैंने पंजीकरण किया है (Verify)', 'ask_id': 'कृपया अपनी 9-अंकीय खाता आईडी भेजें:', 'analyzing': '🔄 खाता जाँचा जा रहा है...', 'success_msg': '✅ <b>खाता सत्यापित!</b>', 'play_btn': 'Play With Hack', 'guide_btn': 'उपयोग कैसे करें', 'help_btn': 'मदদ (Help)', 'select_game': 'गेम चुनें:'},
-    'pk': {'name': '🇵🇰 Pakistan (Urdu)', 'earn_btn': 'پیسہ کمانا شروع کریں', 'reg_btn': 'رجسٹریشن', 'verify_btn': '✅ میں نے رجسٹر کیا ہے (Verify)', 'ask_id': 'براہ کرم اپنی 9 ہندسوں کی اکاؤنٹ آئی ڈی بھیجیں:', 'analyzing': '🔄 چیکنگ...', 'success_msg': '✅ <b>اکاؤنٹ کی تصدیق ہوگئی!</b>', 'play_btn': 'Play With Hack', 'guide_btn': 'کیسے استعمال کریں', 'help_btn': 'مدد', 'select_game': 'گیم منتخب کریں:'},
+    'pk': {'name': '🇵🇰 Pakistan (Urdu)', 'earn_btn': 'پیسہ کمانا شروع کریں', 'reg_btn': 'رجسٹریشن', 'verify_btn': '✅ میں نے رجسٹر করা ہے (Verify)', 'ask_id': 'براہ کرم اپنی 9 ہندسوں کی اکاؤنٹ آئی ڈی بھیجیں:', 'analyzing': '🔄 چیکنگ...', 'success_msg': '✅ <b>اکاؤنٹ کی تصدیق ہوگئی!</b>', 'play_btn': 'Play With Hack', 'guide_btn': 'کیسے استعمال کریں', 'help_btn': 'مدد', 'select_game': 'گیم منتخب کریں:'},
     'bd': {'name': '🇧🇩 Bangladesh (Bangla)', 'earn_btn': 'টাকা আয় শুরু করুন', 'reg_btn': 'রেজিস্ট্রেশন লিংক', 'verify_btn': '✅ আমার রেজিস্ট্রেশন সম্পন্ন হয়েছে', 'ask_id': 'অনুগ্রহ করে আপনার ৯ ডিজিটের একাউন্ট আইডি দিন:', 'analyzing': '🔄 আপনার আইডি যাচাই করা হচ্ছে...', 'success_msg': '✅ <b>একাউন্ট ভেরিফাইড!</b>\n\nআপনার একাউন্টটি সফলভাবে বটের সাথে যুক্ত হয়েছে।', 'play_btn': 'Play With Hack', 'guide_btn': 'কিভাবে ব্যবহার করবেন', 'help_btn': 'সাহায্য', 'select_game': 'হ্যাক শুরু করতে একটি গেম সিলেক্ট করুন:'},
     'id': {'name': '🇮🇩 Indonesia', 'earn_btn': 'Mulai Hasilkan Uang', 'reg_btn': 'Pendaftaran', 'verify_btn': '✅ Saya Sudah Daftar', 'ask_id': 'Kirim ID 9 digit Anda:', 'analyzing': '🔄 Memeriksa...', 'success_msg': '✅ <b>Akun Terverifikasi!</b>', 'play_btn': 'Play With Hack', 'guide_btn': 'Cara pakai', 'help_btn': 'Bantuan', 'select_game': 'Pilih Game:'},
     'ru': {'name': '🇷🇺 Russia', 'earn_btn': 'Начать зарабатывать', 'reg_btn': 'Регистрация', 'verify_btn': '✅ Я зарегистрировался', 'ask_id': 'Отправьте ваш ID (9 цифр):', 'analyzing': '🔄 Проверка...', 'success_msg': '✅ <b>Аккаунт подтвержден!</b>', 'play_btn': 'Play With Hack', 'guide_btn': 'Как использовать', 'help_btn': 'Помощь', 'select_game': 'Выберите игру:'},
@@ -314,6 +316,7 @@ async def play_hack_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     keyboard =[
         [InlineKeyboardButton("✈️ Aviator", callback_data='game_aviator')],
+        [InlineKeyboardButton("🚀 Lucky Jet", callback_data='game_lucky_jet')],  # Lucky Jet বাটন এখানে যুক্ত করা হয়েছে
         [InlineKeyboardButton("💣 Mines", callback_data='game_mines')],
         [InlineKeyboardButton("💣 Mine Mines", callback_data='game_mini_mines')],
         [InlineKeyboardButton("⚽ Penalty", callback_data='game_penalty')],
@@ -340,6 +343,10 @@ async def game_selection_handler(update: Update, context: ContextTypes.DEFAULT_T
         logo_url = LOGO_AVIATOR
         game_name = "Aviator"
         hack_url = LINK_AVIATOR
+    elif game_type == 'game_lucky_jet':  # Lucky Jet হ্যান্ডলার যুক্ত করা হয়েছে
+        logo_url = LOGO_LUCKY_JET
+        game_name = "Lucky Jet"
+        hack_url = LINK_LUCKY_JET
     elif game_type == 'game_mines':
         logo_url = LOGO_MINES
         game_name = "Mines"
