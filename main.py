@@ -25,7 +25,7 @@ class DummyHandler(BaseHTTPRequestHandler):
         self.send_response(200)
         self.send_header("Content-type", "text/plain")
         self.end_headers()
-        self.wfile.write(b"Bot is perfectly running on Render with Firebase!")
+        self.wfile.write(b"Bot is running on Render with Firebase!")
 
 def run_dummy_server():
     port = int(os.environ.get("PORT", 10000))
@@ -67,20 +67,10 @@ IMAGE_URL_REG = "https://i.ibb.co/PZ5VTZVT/IMG-20260201-052425-386.jpg"
 IMAGE_URL_SUCCESS = "https://i.ibb.co/fdwt2s8D/file-00000000973471faba7ce65cd5c96718.png"
 IMAGE_URL_HACK_MENU = "https://i.ibb.co/C3YqyxJn/Data-Breach-at-Betting-Platform-1win-Exposed-96-Million-Users.png"
 
-LOGO_AVIATOR = "https://i.ibb.co/PZBBDv85/images-9.jpg"
-LOGO_LUCKY_JET = "https://i.ibb.co/rRmGk474/1.jpg"  # Lucky Jet লোগো ইমেজ
-LOGO_MINES = "https://i.ibb.co/MDVxth7x/images-8.jpg"
-LOGO_MINI_MINES = "https://i.ibb.co/MDVxth7x/images-8.jpg"
-LOGO_PENALTY = "https://i.ibb.co/5WzBdWX4/hqdefault.jpg"
-LOGO_KING_THIMBLES = "https://i.ibb.co/8LYwvg1j/maxresdefault.jpg"
+LOGO_COIN = "https://i.ibb.co/MDVxth7x/images-8.jpg"
 
 # --- HACK LINKS ---
-LINK_AVIATOR = "https://aviatorgameadmin.netlify.app/"
-LINK_LUCKY_JET = "https://1xbet-melbet-apple.unaux.com/signal.html"  # আপনার দেওয়া Lucky Jet ওয়েব অ্যাপ লিংক
-LINK_MINES = "https://mines-game-hack.netlify.app/"
-LINK_MINI_MINES = "https://1xbet-melbet-apple.unaux.com/minsadmin.html"
-LINK_PENALTY = "https://pnalteaybot.netlify.app/"
-LINK_KING_THIMBLES = "https://kingthimblesbot.netlify.app/"
+LINK_COIN = "https://sunny1.unaux.com/coin.html"
 HOW_TO_USE_LINK = "https://youtube.com/@sunny_bro11?si=gYfOtXnKayCkZloF"
 
 # --- CONVERSATION STATES ---
@@ -91,7 +81,7 @@ WAITING_FOR_ID = 0
 LANGUAGES = {
     'en': {'name': '🇺🇸 English', 'earn_btn': 'Start Earning Money', 'reg_btn': 'Registration Link', 'verify_btn': '✅ I have Registered (Verify)', 'ask_id': 'Please send your 9-digit Account ID:', 'analyzing': '🔄 Verifying your ID...', 'success_msg': '✅ <b>ACCOUNT VERIFIED!</b>\n\nYour account has been successfully synchronized.', 'play_btn': 'Play With Hack', 'guide_btn': 'How to use', 'help_btn': 'Help', 'select_game': 'Select a game to start hacking:'},
     'hi': {'name': '🇮🇳 India (Hindi)', 'earn_btn': 'पैसे कमाना शुरू करें', 'reg_btn': 'पंजीकरण (Registration)', 'verify_btn': '✅ मैंने पंजीकरण किया है (Verify)', 'ask_id': 'कृपया अपनी 9-अंकीय खाता आईडी भेजें:', 'analyzing': '🔄 खाता जाँचा जा रहा है...', 'success_msg': '✅ <b>खाता सत्यापित!</b>', 'play_btn': 'Play With Hack', 'guide_btn': 'उपयोग कैसे करें', 'help_btn': 'मदদ (Help)', 'select_game': 'गेम चुनें:'},
-    'pk': {'name': '🇵🇰 Pakistan (Urdu)', 'earn_btn': 'پیسہ کمانا شروع کریں', 'reg_btn': 'رجسٹریشن', 'verify_btn': '✅ میں نے رجسٹر করা ہے (Verify)', 'ask_id': 'براہ کرم اپنی 9 ہندسوں کی اکاؤنٹ آئی ڈی بھیجیں:', 'analyzing': '🔄 چیکنگ...', 'success_msg': '✅ <b>اکاؤنٹ کی تصدیق ہوگئی!</b>', 'play_btn': 'Play With Hack', 'guide_btn': 'کیسے استعمال کریں', 'help_btn': 'مدد', 'select_game': 'گیم منتخب کریں:'},
+    'pk': {'name': '🇵🇰 Pakistan (Urdu)', 'earn_btn': 'পেসাহ কামানা শুরু কারেঁ', 'reg_btn': 'রেজিস্ট্রেশন', 'verify_btn': '✅ মেয়নে রেজিস্টার কিয়া হ্যায় (Verify)', 'ask_id': 'ব্রাহে করম আপনি ৯ হেন্দসো কি অ্যাকাউন্ট আইডি ভেজেঁ:', 'analyzing': '🔄 চেকিং...', 'success_msg': '✅ <b>অ্যাকাউন্ট কি তসদিক হো গয়ি!</b>', 'play_btn': 'Play With Hack', 'guide_btn': 'ক্যাসে ইস্তেমাল করেঁ', 'help_btn': 'মদদ', 'select_game': 'গেম মুন্তখিব করেঁ:'},
     'bd': {'name': '🇧🇩 Bangladesh (Bangla)', 'earn_btn': 'টাকা আয় শুরু করুন', 'reg_btn': 'রেজিস্ট্রেশন লিংক', 'verify_btn': '✅ আমার রেজিস্ট্রেশন সম্পন্ন হয়েছে', 'ask_id': 'অনুগ্রহ করে আপনার ৯ ডিজিটের একাউন্ট আইডি দিন:', 'analyzing': '🔄 আপনার আইডি যাচাই করা হচ্ছে...', 'success_msg': '✅ <b>একাউন্ট ভেরিফাইড!</b>\n\nআপনার একাউন্টটি সফলভাবে বটের সাথে যুক্ত হয়েছে।', 'play_btn': 'Play With Hack', 'guide_btn': 'কিভাবে ব্যবহার করবেন', 'help_btn': 'সাহায্য', 'select_game': 'হ্যাক শুরু করতে একটি গেম সিলেক্ট করুন:'},
     'id': {'name': '🇮🇩 Indonesia', 'earn_btn': 'Mulai Hasilkan Uang', 'reg_btn': 'Pendaftaran', 'verify_btn': '✅ Saya Sudah Daftar', 'ask_id': 'Kirim ID 9 digit Anda:', 'analyzing': '🔄 Memeriksa...', 'success_msg': '✅ <b>Akun Terverifikasi!</b>', 'play_btn': 'Play With Hack', 'guide_btn': 'Cara pakai', 'help_btn': 'Bantuan', 'select_game': 'Pilih Game:'},
     'ru': {'name': '🇷🇺 Russia', 'earn_btn': 'Начать зарабатывать', 'reg_btn': 'Регистрация', 'verify_btn': '✅ Я зарегистрировался', 'ask_id': 'Отправьте ваш ID (9 цифр):', 'analyzing': '🔄 Проверка...', 'success_msg': '✅ <b>Аккаунт подтвержден!</b>', 'play_btn': 'Play With Hack', 'guide_btn': 'Как использовать', 'help_btn': 'Помощь', 'select_game': 'Выберите игру:'},
@@ -161,7 +151,7 @@ async def send_language_menu(update: Update, context: ContextTypes.DEFAULT_TYPE)
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
     
-    # 🌟 Firebase-এ ইউজার সেভ করার ফাংশন 🌟
+    # Firebase-এ ইউজার সেভ করার ফাংশন
     save_user(user_id)
     
     is_member = await check_membership(user_id, context)
@@ -314,13 +304,9 @@ async def play_hack_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     lang_code = context.user_data.get('selected_lang', 'en')
     lang_data = LANGUAGES.get(lang_code, LANGUAGES['en'])
 
-    keyboard =[
-        [InlineKeyboardButton("✈️ Aviator", callback_data='game_aviator')],
-        [InlineKeyboardButton("🚀 Lucky Jet", callback_data='game_lucky_jet')],  # Lucky Jet বাটন এখানে যুক্ত করা হয়েছে
-        [InlineKeyboardButton("💣 Mines", callback_data='game_mines')],
-        [InlineKeyboardButton("💣 Mine Mines", callback_data='game_mini_mines')],
-        [InlineKeyboardButton("⚽ Penalty", callback_data='game_penalty')],
-        [InlineKeyboardButton("👑 King Thimbles", callback_data='game_king_thimbles')],
+    # পূর্বের সকল অপশন পরিবর্তন করে শুধুমাত্র Coin SIGNAL রাখা হয়েছে
+    keyboard = [
+        [InlineKeyboardButton("🪙 Coin SIGNAL", callback_data='game_coin')]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
@@ -335,37 +321,17 @@ async def game_selection_handler(update: Update, context: ContextTypes.DEFAULT_T
     await query.answer()
     
     game_type = query.data
-    logo_url = LOGO_AVIATOR
-    game_name = "Aviator"
-    hack_url = LINK_AVIATOR
+    logo_url = LOGO_COIN
+    game_name = "Coin SIGNAL"
+    hack_url = LINK_COIN
 
-    if game_type == 'game_aviator':
-        logo_url = LOGO_AVIATOR
-        game_name = "Aviator"
-        hack_url = LINK_AVIATOR
-    elif game_type == 'game_lucky_jet':  # Lucky Jet হ্যান্ডলার যুক্ত করা হয়েছে
-        logo_url = LOGO_LUCKY_JET
-        game_name = "Lucky Jet"
-        hack_url = LINK_LUCKY_JET
-    elif game_type == 'game_mines':
-        logo_url = LOGO_MINES
-        game_name = "Mines"
-        hack_url = LINK_MINES
-    elif game_type == 'game_mini_mines':
-        logo_url = LOGO_MINI_MINES
-        game_name = "Mine Mines"
-        hack_url = LINK_MINI_MINES
-    elif game_type == 'game_penalty':
-        logo_url = LOGO_PENALTY
-        game_name = "Penalty"
-        hack_url = LINK_PENALTY
-    elif game_type == 'game_king_thimbles':
-        logo_url = LOGO_KING_THIMBLES
-        game_name = "King Thimbles"
-        hack_url = LINK_KING_THIMBLES
+    if game_type == 'game_coin':
+        logo_url = LOGO_COIN
+        game_name = "Coin SIGNAL"
+        hack_url = LINK_COIN
 
     keyboard = [
-        [InlineKeyboardButton(f"📱 Open {game_name} Hack", web_app=WebAppInfo(url=hack_url))],
+        [InlineKeyboardButton(f"📱 Open {game_name}", web_app=WebAppInfo(url=hack_url))],
         [InlineKeyboardButton("🔙 Back", callback_data='play_hack_action')]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
@@ -375,13 +341,12 @@ async def game_selection_handler(update: Update, context: ContextTypes.DEFAULT_T
     except: pass
     
     try:
-        await context.bot.send_photo(chat_id=update.effective_chat.id, photo=logo_url, caption=f"<b>{game_name} Hack Connected!</b>\n\nClick the button below to access the hack tool.", parse_mode='HTML', reply_markup=reply_markup)
+        await context.bot.send_photo(chat_id=update.effective_chat.id, photo=logo_url, caption=f"<b>{game_name} Connected!</b>\n\nClick the button below to access the hack tool.", parse_mode='HTML', reply_markup=reply_markup)
     except Exception:
         await context.bot.send_message(chat_id=update.effective_chat.id, text=f"<b>{game_name} Selected.</b>\nClick below:", parse_mode='HTML', reply_markup=reply_markup)
 
 # ================= ADMIN HANDLERS =================
 async def admin_panel(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    # ⚠️ এইখানে আইডি চেক করা হয়। অন্য আইডি হলে বট কোনো রেসপন্স করবে না।
     if update.effective_user.id != ADMIN_ID:
         return ConversationHandler.END
 
@@ -557,5 +522,5 @@ if __name__ == '__main__':
     application.add_handler(CallbackQueryHandler(close_admin, pattern='^admin_close$'))
     application.add_handler(CallbackQueryHandler(restart_bot_handler, pattern='^restart_bot_action$'))
 
-    print("Bot is perfectly running... Checking Database logs soon! 🔍")
+    print("Bot is running... Checking Database logs soon! 🔍")
     application.run_polling()
