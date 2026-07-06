@@ -64,8 +64,8 @@ CHANNEL_LINK = "https://t.me/+3U0nMzWs4Aw0YjFl"
 # --- MEDIA LINKS ---
 IMAGE_URL_WELCOME = "https://i.ibb.co/XfxnhBYY/file-000000006ac47206b9a3e5b41d2e17e1.png"
 IMAGE_URL_REG = "https://i.ibb.co/PZ5VTZVT/IMG-20260201-052425-386.jpg"
-IMAGE_URL_SUCCESS = "https://i.ibb.co/fdwt2s8D/file-00000000973471faba7ce65cd5c96718.png"
-IMAGE_URL_HACK_MENU = "https://i.ibb.co/C3YqyxJn/Data-Breach-at-Betting-Platform-1win-Exposed-96-Million-Users.png"
+IMAGE_URL_SUCCESS = "https://i.ibb.co/TMwm08jL/file-0000000049547208b82b9486019c2ba0.png"
+IMAGE_URL_HACK_MENU = "https://i.ibb.co/xKM4500N/file-000000003fe8720bad21d32e5802d848.png"
 
 LOGO_AVIATOR = "https://i.ibb.co/PZBBDv85/images-9.jpg"
 LOGO_LUCKY_JET = "https://i.ibb.co/rRmGk474/1.jpg"
@@ -73,7 +73,7 @@ LOGO_MINES = "https://i.ibb.co/MDVxth7x/images-8.jpg"
 LOGO_MINI_MINES = "https://i.ibb.co/MDVxth7x/images-8.jpg"
 LOGO_PENALTY = "https://i.ibb.co/5WzBdWX4/hqdefault.jpg"
 LOGO_KING_THIMBLES = "https://i.ibb.co/8LYwvg1j/maxresdefault.jpg"
-LOGO_COIN = "https://i.ibb.co/MDVxth7x/images-8.jpg" # Coin SIGNAL-এর লোগো হিসেবে Mines-এর ইমেজটি রাখা হয়েছে
+LOGO_COIN = "https://i.ibb.co/jPb1tK68/file-000000009198720b89de6ec83058fd19.png" # Coin SIGNAL-এর লোগো হিসেবে Mines-এর ইমেজটি রাখা হয়েছে
 
 # --- HACK LINKS ---
 LINK_AVIATOR = "https://aviatorgameadmin.netlify.app/"
